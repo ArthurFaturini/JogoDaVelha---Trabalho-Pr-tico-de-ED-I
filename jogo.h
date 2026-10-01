@@ -1,6 +1,8 @@
 #ifndef JOGO_H
 #define JOGO_H
 
+#include "lista.h" // Inclui as estruturas de dados
+
 // Função principal do menu para gerenciar partidas
 void iniciarPartidas();
 
@@ -9,9 +11,9 @@ void inicializarTabuleiro(char tabuleiro[3][3]);
 void mostrarTabuleiro(char tabuleiro[3][3]);
 int decidirQuemComeca();
 
-// Jogadas
-void jogadaUsuario(char tabuleiro[3][3], char marcador);
-void jogadaComputador(char tabuleiro[3][3], char marcador);
+// Jogadas atualizadas para receberem o ponteiro da lista onde devem salvar o movimento
+void jogadaUsuario(char tabuleiro[3][3], char marcador, Nodo **listaJogadas);
+void jogadaComputador(char tabuleiro[3][3], char marcador, Nodo **listaJogadas);
 
 // Checagens de término da partida
 int verificarVencedor(char tabuleiro[3][3], char marcador);

@@ -42,7 +42,7 @@ void inserirJogada(Nodo **inicio, int linha, int coluna)
 
     // Formata a jogada no padrão exigido: "linha-coluna" (ex: "1-2")
     // Usamos linha+1 e coluna+1 porque no código a matriz vai de 0 a 2, mas para o usuário é 1 a 3.
-    sprintf(novoNodo->jogada, "%d-%d", linha + 1, coluna + 1);
+    snprintf(novoNodo->jogada, sizeof(novoNodo->jogada), "%d-%d", linha + 1, coluna + 1);
     novoNodo->prox = NULL; // Como entra no fim, o próximo é sempre NULL
 
     // Se a lista estiver vazia, o novo nó passa a ser o primeiro

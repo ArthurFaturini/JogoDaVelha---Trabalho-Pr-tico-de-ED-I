@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <windows.h>
+#include <string.h>
 #include "jogo.h"
 
 void inicializarTabuleiro(char tabuleiro[3][3])
@@ -44,7 +45,7 @@ int decidirQuemComeca()
     printf("Digite um numero de 0 a 5: ");
     scanf("%d", &numeroUsuario);
 
-    numeroComputador = rand() % 6; // Sorteio aleatório de 0 a 5 do computador
+    numeroComputador = rand() % 6;
 
     soma = numeroUsuario + numeroComputador;
     printf("\nO computador escolheu o numero %d.\n", numeroComputador);
@@ -53,16 +54,16 @@ int decidirQuemComeca()
     if (soma % 2 == escolhaUsuario)
     {
         printf("Voce venceu no par ou impar! Voce comeca com o 'X'.\n");
-        return 1; // 1 = Usuario
+        return 1;
     }
     else
     {
         printf("O computador venceu no par ou impar! Ele comeca com o 'X'.\n");
-        return 0; // 0 = Computador
+        return 0;
     }
 }
 
-void jogadaUsuario(char tabuleiro[3][3], char marcador)
+void jogadaUsuario(char tabuleiro[3][3], char marcador, Nodo **listaJogadas)
 {
     int linha, coluna;
     int valida = 0;
@@ -72,7 +73,7 @@ void jogadaUsuario(char tabuleiro[3][3], char marcador)
         printf("Sua vez (%c). Digite a linha e coluna (1-3 1-3): ", marcador);
         if (scanf("%d %d", &linha, &coluna) == 2)
         {
-            linha--; // Converte de 1..3 para índice 0..2
+            linha--;
             coluna--;
 
             if (linha >= 0 && linha < 3 && coluna >= 0 && coluna < 3)
@@ -80,6 +81,7 @@ void jogadaUsuario(char tabuleiro[3][3], char marcador)
                 if (tabuleiro[linha][coluna] == ' ')
                 {
                     tabuleiro[linha][coluna] = marcador;
+                    inserirJogada(listaJogadas, linha, coluna);
                     valida = 1;
                 }
                 else
@@ -94,7 +96,6 @@ void jogadaUsuario(char tabuleiro[3][3], char marcador)
         }
         else
         {
-            // Limpa o buffer caso o usuário digite letras
             while (getchar() != '\n')
                 ;
             printf("Entrada invalida! Digite numeros.\n");
@@ -102,11 +103,10 @@ void jogadaUsuario(char tabuleiro[3][3], char marcador)
     }
 }
 
-void jogadaComputador(char tabuleiro[3][3], char marcador)
+void jogadaComputador(char tabuleiro[3][3], char marcador, Nodo **listaJogadas)
 {
-    int i;
+    int i, j;
     printf("\nComputador (%c) jogando", marcador);
-    // For para colocar dinâmica na jogada do computador
     for (i = 0; i < 3; i++)
     {
         Sleep(500);
@@ -114,14 +114,15 @@ void jogadaComputador(char tabuleiro[3][3], char marcador)
     }
     Sleep(500);
     printf("\n");
-    // Jogada simples no primeiro espaço livre (temporário)
-    for (int i = 0; i < 3; i++)
+
+    for (i = 0; i < 3; i++)
     {
-        for (int j = 0; j < 3; j++)
+        for (j = 0; j < 3; j++)
         {
             if (tabuleiro[i][j] == ' ')
             {
                 tabuleiro[i][j] = marcador;
+                inserirJogada(listaJogadas, i, j);
                 return;
             }
         }
@@ -130,7 +131,6 @@ void jogadaComputador(char tabuleiro[3][3], char marcador)
 
 int verificarVencedor(char tabuleiro[3][3], char marcador)
 {
-    // Linhas e Colunas
     for (int i = 0; i < 3; i++)
     {
         if ((tabuleiro[i][0] == marcador && tabuleiro[i][1] == marcador && tabuleiro[i][2] == marcador) ||
@@ -139,7 +139,6 @@ int verificarVencedor(char tabuleiro[3][3], char marcador)
             return 1;
         }
     }
-    // Diagonais
     if ((tabuleiro[0][0] == marcador && tabuleiro[1][1] == marcador && tabuleiro[2][2] == marcador) ||
         (tabuleiro[0][2] == marcador && tabuleiro[1][1] == marcador && tabuleiro[2][0] == marcador))
     {
@@ -155,10 +154,10 @@ int verificarEmpate(char tabuleiro[3][3])
         for (int j = 0; j < 3; j++)
         {
             if (tabuleiro[i][j] == ' ')
-                return 0; // Ainda há casas livres
+                return 0;
         }
     }
-    return 1; // Tabuleiro cheio sem vencedor
+    return 1;
 }
 
 void iniciarPartidas()
@@ -167,6 +166,9 @@ void iniciarPartidas()
     int numeroPartida = 1;
     char continuar = 's';
     int quemComecaPartida;
+
+    Partida *historicoInicio = NULL;
+    Partida *historicoAtual = NULL;
 
     srand((unsigned int)time(NULL));
 
@@ -180,6 +182,8 @@ void iniciarPartidas()
 
         inicializarTabuleiro(tabuleiro);
 
+        Partida *partidaCorrente = criarPartida(numeroPartida, "Usuario", "Computador");
+
         if (numeroPartida == 1)
         {
             quemComecaPartida = decidirQuemComeca();
@@ -191,25 +195,23 @@ void iniciarPartidas()
                    (quemComecaPartida == 1) ? "VOCE" : "o COMPUTADOR");
         }
 
-        Sleep(2000);
+        Sleep(1000);
         mostrarTabuleiro(tabuleiro);
-        // Sleep(2000);
 
-        int turnoAtual = quemComecaPartida; // 1 = Usuario, 0 = Computador
+        int turnoAtual = quemComecaPartida;
         int fimDeJogo = 0;
 
-        // Loop da Partida Completa
         while (!fimDeJogo)
         {
             char marcadorAtual = (turnoAtual == quemComecaPartida) ? 'X' : 'O';
 
             if (turnoAtual == 1)
             {
-                jogadaUsuario(tabuleiro, marcadorAtual);
+                jogadaUsuario(tabuleiro, marcadorAtual, &partidaCorrente->jogadasUsuario);
             }
             else
             {
-                jogadaComputador(tabuleiro, marcadorAtual);
+                jogadaComputador(tabuleiro, marcadorAtual, &partidaCorrente->jogadasComputador);
             }
 
             mostrarTabuleiro(tabuleiro);
@@ -217,23 +219,53 @@ void iniciarPartidas()
             if (verificarVencedor(tabuleiro, marcadorAtual))
             {
                 if (turnoAtual == 1)
+                {
                     printf("Parabens! Voce venceu a partida %d!\n", numeroPartida);
+                    strcpy(partidaCorrente->resultado, "Usuario");
+                }
                 else
+                {
                     printf("O computador venceu a partida %d!\n", numeroPartida);
+                    strcpy(partidaCorrente->resultado, "Computador");
+                }
                 fimDeJogo = 1;
             }
             else if (verificarEmpate(tabuleiro))
             {
                 printf("Empate! Ninguem venceu esta partida.\n");
+                strcpy(partidaCorrente->resultado, "Empate");
                 fimDeJogo = 1;
             }
 
-            // Alterna o turno interno da partida (entre 1 e 0)
             turnoAtual = (turnoAtual == 1) ? 0 : 1;
         }
+
+        if (historicoInicio == NULL)
+        {
+            historicoInicio = partidaCorrente;
+        }
+        else
+        {
+            historicoAtual->prox = partidaCorrente;
+        }
+        historicoAtual = partidaCorrente;
 
         printf("\nDeseja jogar mais uma partida? (s/n): ");
         scanf(" %c", &continuar);
         numeroPartida++;
     }
+
+    printf("\n=== HISTORICO DA SESSAO ===\n");
+    Partida *p = historicoInicio;
+    while (p != NULL)
+    {
+        printf("\nPartida %d | Vencedor: %s\n", p->id, p->resultado);
+        printf("Jogadas Usuario: ");
+        imprimirJogadas(p->jogadasUsuario);
+        printf("Jogadas Computador: ");
+        imprimirJogadas(p->jogadasComputador);
+        p = p->prox;
+    }
+    printf("===========================\n");
+    system("pause");
 }

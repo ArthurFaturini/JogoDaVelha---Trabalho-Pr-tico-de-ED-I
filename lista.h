@@ -5,7 +5,7 @@
 // Nó para armazenar uma jogada específica
 typedef struct Nodo
 {
-    char jogada[4]; // Guarda o formato "1-2" com o terminador nulo
+    char jogada[25]; // Guarda o formato "1-2" com o terminador nulo e tamanho 25 apenas para silenciar o compilador
     struct Nodo *prox;
 } Nodo;
 
