@@ -92,3 +92,25 @@ void liberarJogadas(Nodo *inicio)
         atual = proximo;       // Avança para o próximo
     }
 }
+
+void salvarPartidas(Partida *historico)
+{
+    FILE *arquivo = fopen("partidas_velha.txt", "a");
+
+    if (arquivo == NULL)
+    {
+        printf("Erro ao abrir o arquivo para salvar as partidas.\n");
+        return;
+    }
+
+    Partida *p = historico;
+
+    while (p != NULL)
+    {
+    printf("Salvando partida %d...\n", p->id);
+
+    p = p->prox;
+    }
+
+    fclose(arquivo);
+}

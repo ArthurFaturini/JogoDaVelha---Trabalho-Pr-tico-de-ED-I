@@ -1,15 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "jogo.h"
 
-int main()
-{
+int main() {
     int opcao;
     char confirmarSaida;
+    Partida *historico = NULL;
+    int proximoId = 1;
 
     do
     {
-        system("cls"); // Limpa a tela do terminal, apenas no Windows
+#if defined(_WIN32)
+        system("cls");
+#else
+        if (isatty(fileno(stdout)))
+            system("clear");
+#endif
         printf("\n=== JOGO DA VELHA ===\n");
         printf("1) Jogar partidas de Jogo da Velha\n");
         printf("2) Salvar as partidas do Jogo da Velha\n");
@@ -27,13 +34,13 @@ int main()
         switch (opcao)
         {
         case 1:
-            iniciarPartidas();
+            iniciarPartidas(&historico, &proximoId);
             break;
         case 2:
-            printf("\n[Em construcao] Salvar partidas...\n");
+            salvarPartidas(historico);
             break;
         case 3:
-            printf("\n[Em construcao] Exibir ranking...\n");
+            exibirRanking();
             break;
         case 4:
             printf("\nDeseja salvar as partidas da sessao no arquivo antes de sair? (S/N): ");

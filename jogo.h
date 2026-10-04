@@ -4,7 +4,8 @@
 #include "lista.h" // Inclui as estruturas de dados
 
 // Função principal do menu para gerenciar partidas
-void iniciarPartidas();
+void iniciarPartidas(Partida **historico, int *proximoId);();// alterei para que a função receba o ponteiro do histórico e o próximo ID
+void salvarPartidas(Partida *historico);
 
 // Estrutura do tabuleiro e par ou ímpar
 void inicializarTabuleiro(char tabuleiro[3][3]);
@@ -18,5 +19,6 @@ void jogadaComputador(char tabuleiro[3][3], char marcador, Nodo **listaJogadas);
 // Checagens de término da partida
 int verificarVencedor(char tabuleiro[3][3], char marcador);
 int verificarEmpate(char tabuleiro[3][3]);
+
 
 #endif

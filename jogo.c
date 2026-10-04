@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <windows.h>
 #include <string.h>
+#include <unistd.h>
 #include "jogo.h"
 
 void inicializarTabuleiro(char tabuleiro[3][3])
@@ -70,8 +70,8 @@ void jogadaUsuario(char tabuleiro[3][3], char marcador, Nodo **listaJogadas)
 
     while (!valida)
     {
-        printf("Sua vez (%c). Digite a linha e coluna (1-3 1-3): ", marcador);
-        if (scanf("%d %d", &linha, &coluna) == 2)
+        printf("Sua vez (%c). Digite a posição (ex: 1-3): ", marcador);
+        if (scanf("%d-%d", &linha, &coluna) == 2)
         {
             linha--;
             coluna--;
@@ -109,10 +109,10 @@ void jogadaComputador(char tabuleiro[3][3], char marcador, Nodo **listaJogadas)
     printf("\nComputador (%c) jogando", marcador);
     for (i = 0; i < 3; i++)
     {
-        Sleep(500);
+        sleep(1);
         printf(".");
     }
-    Sleep(500);
+    sleep(1);
     printf("\n");
 
     for (i = 0; i < 3; i++)
@@ -160,15 +160,11 @@ int verificarEmpate(char tabuleiro[3][3])
     return 1;
 }
 
-void iniciarPartidas()
+void iniciarPartidas(Partida **historico, int *proximoId)
 {
     char tabuleiro[3][3];
-    int numeroPartida = 1;
     char continuar = 's';
     int quemComecaPartida;
-
-    Partida *historicoInicio = NULL;
-    Partida *historicoAtual = NULL;
 
     srand((unsigned int)time(NULL));
 
@@ -176,13 +172,16 @@ void iniciarPartidas()
 
     while (continuar == 's' || continuar == 'S')
     {
+        int numeroPartida = *proximoId;
+
         printf("\n=============================");
         printf("\n       PARTIDA %d", numeroPartida);
         printf("\n=============================\n");
 
         inicializarTabuleiro(tabuleiro);
 
-        Partida *partidaCorrente = criarPartida(numeroPartida, "Usuario", "Computador");
+        Partida *partidaCorrente = criarPartida(*proximoId, "Usuario", "Computador");
+        (*proximoId)++;
 
         if (numeroPartida == 1)
         {
@@ -195,7 +194,7 @@ void iniciarPartidas()
                    (quemComecaPartida == 1) ? "VOCE" : "o COMPUTADOR");
         }
 
-        Sleep(1000);
+        sleep(1);
         mostrarTabuleiro(tabuleiro);
 
         int turnoAtual = quemComecaPartida;
@@ -240,32 +239,65 @@ void iniciarPartidas()
             turnoAtual = (turnoAtual == 1) ? 0 : 1;
         }
 
-        if (historicoInicio == NULL)
+        if (*historico == NULL)
         {
-            historicoInicio = partidaCorrente;
+            *historico = partidaCorrente;
         }
         else
         {
+            Partida *historicoAtual = *historico;
+
+            while (historicoAtual->prox != NULL)
+            {
+                historicoAtual = historicoAtual->prox;
+            }
+
             historicoAtual->prox = partidaCorrente;
         }
-        historicoAtual = partidaCorrente;
 
         printf("\nDeseja jogar mais uma partida? (s/n): ");
         scanf(" %c", &continuar);
-        numeroPartida++;
     }
 
-    printf("\n=== HISTORICO DA SESSAO ===\n");
-    Partida *p = historicoInicio;
+        printf("\n=== HISTORICO DA SESSAO ===\n");
+
+        int vitoriasUsuario = 0;
+        int vitoriasComputador = 0;
+
+        Partida *p = *historico;
     while (p != NULL)
     {
         printf("\nPartida %d | Vencedor: %s\n", p->id, p->resultado);
         printf("Jogadas Usuario: ");
         imprimirJogadas(p->jogadasUsuario);
-        printf("Jogadas Computador: ");
-        imprimirJogadas(p->jogadasComputador);
-        p = p->prox;
+        if (strcmp(p->resultado, "Usuario") == 0)
+        {
+              vitoriasUsuario++;
+        }
+            else if (strcmp(p->resultado, "Computador") == 0)
+                {
+                    vitoriasComputador++;
+                }
+                    p = p->prox;
     }
-    printf("===========================\n");
-    system("pause");
+
+
+
+
+    printf("\n=== RESULTADO GERAL ===\n");
+    printf("Vitorias do Usuario: %d\n", vitoriasUsuario);
+    printf("Vitorias do Computador: %d\n", vitoriasComputador);
+
+    if (vitoriasUsuario > vitoriasComputador)
+    {
+    printf("Vencedor geral: Usuario\n");
+    }
+    else if (vitoriasComputador > vitoriasUsuario)
+    {
+    printf("Vencedor geral: Computador\n");
+    }
+    else
+    {
+    printf("Vencedor geral: Empate\n");
+    }
 }
