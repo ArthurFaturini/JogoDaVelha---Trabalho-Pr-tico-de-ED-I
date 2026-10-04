@@ -38,7 +38,8 @@ int main()
             iniciarPartidas(&historico, &proximoId);
             break;
         case 2:
-            salvarPartidas(historico);
+            salvarPartidas(&historico);
+            pause();
             break;
         case 3:
             // exibirRanking();
@@ -49,7 +50,7 @@ int main()
             scanf(" %c", &confirmarSaida);
             if (confirmarSaida == 'S' || confirmarSaida == 's')
             {
-                printf("\n[Em construcao] Salvando partidas...\n");
+                salvarPartidas(&historico);
             }
             printf("\nEncerrando o programa. Ate logo!\n");
             break;

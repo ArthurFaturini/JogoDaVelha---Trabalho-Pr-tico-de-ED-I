@@ -5,7 +5,7 @@
 
 // Função principal do menu para gerenciar partidas
 void iniciarPartidas(Partida **historico, int *proximoId); // alterei para que a função receba o ponteiro do histórico e o próximo ID
-void salvarPartidas(Partida *historico);
+void salvarPartidas(Partida **historico);
 
 // Estrutura do tabuleiro e par ou ímpar
 void inicializarTabuleiro(char tabuleiro[3][3]);

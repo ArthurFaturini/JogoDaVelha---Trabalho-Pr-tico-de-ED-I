@@ -94,27 +94,79 @@ void liberarJogadas(Nodo *inicio)
     }
 }
 
-void salvarPartidas(Partida *historico)
+void salvarPartidas(Partida **historico)
 {
+    if (historico == NULL || *historico == NULL)
+    {
+        printf("\nNenhuma partida na memoria para salvar.\n");
+        return;
+    }
+
     FILE *arquivo = fopen("partidas_velha.txt", "a");
 
     if (arquivo == NULL)
     {
         printf("Erro ao abrir o arquivo para salvar as partidas.\n");
+        pause();
         return;
     }
 
-    Partida *p = historico;
-
     printf("\n=== SALVANDO PARTIDAS ===\n");
+
+    Partida *p = *historico;
+    Partida *proximaPartida = NULL;
 
     while (p != NULL)
     {
-        printf("Salvando partida %d...\n", p->id);
-        sleep(0.5);
-        p = p->prox;
+        printf("Salvando partida %d no arquivo", p->id);
+        int i;
+        for (i = 0; i < 3; i++)
+        {
+            printf(".");
+            // sleep(1);
+        }
+        printf("\n");
+
+        // 1. ID e Nome do Usuário
+        fprintf(arquivo, "%d;%s;", p->id, p->nomeUsuario);
+
+        // 2. Lista de jogadas do Usuário (separadas por ;)
+        Nodo *jUser = p->jogadasUsuario;
+        while (jUser != NULL)
+        {
+            fprintf(arquivo, "%s;", jUser->jogada);
+            jUser = jUser->prox;
+        }
+
+        // 3. Nome do Computador
+        fprintf(arquivo, "%s;", p->nomeComputador);
+
+        // 4. Lista de jogadas do Computador (separadas por ;)
+        Nodo *jComp = p->jogadasComputador;
+        while (jComp != NULL)
+        {
+            fprintf(arquivo, "%s;", jComp->jogada);
+            jComp = jComp->prox;
+        }
+
+        // 5. Resultado da partida e quebra de linha
+        fprintf(arquivo, "%s\n", p->resultado);
+
+        // Guarda a referência da próxima partida antes de liberar a atual
+        proximaPartida = p->prox;
+
+        // Libera a memória das sublistas de jogadas e do nó da partida
+        liberarJogadas(p->jogadasUsuario);
+        liberarJogadas(p->jogadasComputador);
+        free(p);
+
+        p = proximaPartida;
     }
 
     fclose(arquivo);
-    pause();
+
+    // Reseta o ponteiro da main para NULL indicando que a memória foi limpa, evita duplicidade de partidas no "partidas_vela.txt"
+    *historico = NULL;
+
+    printf("\nPartidas salvas com sucesso!\n");
 }
