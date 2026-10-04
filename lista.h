@@ -28,4 +28,8 @@ void imprimirJogadas(Nodo *inicio);
 void liberarJogadas(Nodo *inicio);
 void salvarPartidas(Partida *historico);
 void exibirRanking();
+
+// Função que pausa a tela
+void pause();
+
 #endif

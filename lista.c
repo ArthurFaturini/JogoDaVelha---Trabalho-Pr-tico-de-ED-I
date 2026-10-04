@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "lista.h"
 
 // Função para inicializar uma nova partida na memória
@@ -105,12 +106,15 @@ void salvarPartidas(Partida *historico)
 
     Partida *p = historico;
 
+    printf("\n=== SALVANDO PARTIDAS ===\n");
+
     while (p != NULL)
     {
-    printf("Salvando partida %d...\n", p->id);
-
-    p = p->prox;
+        printf("Salvando partida %d...\n", p->id);
+        sleep(0.5);
+        p = p->prox;
     }
 
     fclose(arquivo);
+    pause();
 }

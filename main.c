@@ -3,7 +3,8 @@
 #include <unistd.h>
 #include "jogo.h"
 
-int main() {
+int main()
+{
     int opcao;
     char confirmarSaida;
     Partida *historico = NULL;
@@ -40,7 +41,8 @@ int main() {
             salvarPartidas(historico);
             break;
         case 3:
-            exibirRanking();
+            // exibirRanking();
+            pause();
             break;
         case 4:
             printf("\nDeseja salvar as partidas da sessao no arquivo antes de sair? (S/N): ");
@@ -53,6 +55,7 @@ int main() {
             break;
         default:
             printf("\nOpcao invalida! Tente novamente.\n");
+            pause();
         }
     } while (opcao != 4);
 

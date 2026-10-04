@@ -5,6 +5,15 @@
 #include <unistd.h>
 #include "jogo.h"
 
+void pause()
+{
+    printf("\nPressione ENTER para continuar...");
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF)
+        ;      // Limpa o buffer até o Enter
+    getchar(); // Aguarda o novo Enter do usuário
+}
+
 void inicializarTabuleiro(char tabuleiro[3][3])
 {
     for (int i = 0; i < 3; i++)
@@ -259,12 +268,12 @@ void iniciarPartidas(Partida **historico, int *proximoId)
         scanf(" %c", &continuar);
     }
 
-        printf("\n=== HISTORICO DA SESSAO ===\n");
+    printf("\n=== HISTORICO DA SESSAO ===\n");
 
-        int vitoriasUsuario = 0;
-        int vitoriasComputador = 0;
+    int vitoriasUsuario = 0;
+    int vitoriasComputador = 0;
 
-        Partida *p = *historico;
+    Partida *p = *historico;
     while (p != NULL)
     {
         printf("\nPartida %d | Vencedor: %s\n", p->id, p->resultado);
@@ -272,17 +281,14 @@ void iniciarPartidas(Partida **historico, int *proximoId)
         imprimirJogadas(p->jogadasUsuario);
         if (strcmp(p->resultado, "Usuario") == 0)
         {
-              vitoriasUsuario++;
+            vitoriasUsuario++;
         }
-            else if (strcmp(p->resultado, "Computador") == 0)
-                {
-                    vitoriasComputador++;
-                }
-                    p = p->prox;
+        else if (strcmp(p->resultado, "Computador") == 0)
+        {
+            vitoriasComputador++;
+        }
+        p = p->prox;
     }
-
-
-
 
     printf("\n=== RESULTADO GERAL ===\n");
     printf("Vitorias do Usuario: %d\n", vitoriasUsuario);
@@ -290,14 +296,15 @@ void iniciarPartidas(Partida **historico, int *proximoId)
 
     if (vitoriasUsuario > vitoriasComputador)
     {
-    printf("Vencedor geral: Usuario\n");
+        printf("Vencedor geral: Usuario\n");
     }
     else if (vitoriasComputador > vitoriasUsuario)
     {
-    printf("Vencedor geral: Computador\n");
+        printf("Vencedor geral: Computador\n");
     }
     else
     {
-    printf("Vencedor geral: Empate\n");
+        printf("Vencedor geral: Empate\n");
     }
+    pause();
 }
