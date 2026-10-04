@@ -42,7 +42,7 @@ int main()
             pause();
             break;
         case 3:
-            // exibirRanking();
+            exibirRanking();
             pause();
             break;
         case 4:

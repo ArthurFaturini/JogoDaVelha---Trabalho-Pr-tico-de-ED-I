@@ -21,6 +21,13 @@ typedef struct Partida
     struct Partida *prox; // Ponteiro para encadear múltiplas partidas no histórico
 } Partida;
 
+// Estrutura auxiliar interna apenas para contagem e ordenação do Ranking
+typedef struct
+{
+    char nome[50];
+    int vitorias;
+} JogadorRanking;
+
 // Funções para gerenciar as jogadas
 Partida *criarPartida(int id, const char *usuario, const char *computador);
 void inserirJogada(Nodo **inicio, int linha, int coluna);

@@ -170,3 +170,96 @@ void salvarPartidas(Partida **historico)
 
     printf("\nPartidas salvas com sucesso!\n");
 }
+
+void exibirRanking()
+{
+    FILE *arquivo = fopen("partidas_velha.txt", "r");
+
+    if (arquivo == NULL)
+    {
+        printf("\nNenhum registro encontrado em 'partidas_velha.txt'. Jogue e salve partidas primeiro!\n");
+        pause();
+        return;
+    }
+
+    JogadorRanking ranking[100]; // Suporta até 100 jogadores diferentes
+    int totalJogadores = 0;
+    char linha[1024];
+
+    // Ler linha por linha do arquivo .txt
+    while (fgets(linha, sizeof(linha), arquivo) != NULL)
+    {
+        // Remove a quebra de linha do final (\n) se existir
+        linha[strcspn(linha, "\n")] = '\0';
+        linha[strcspn(linha, "\r")] = '\0';
+
+        if (strlen(linha) == 0)
+            continue;
+
+        // O resultado da partida é sempre o último campo da linha (separado por ;)
+        char *ultimoPontoVirgula = strrchr(linha, ';');
+        if (ultimoPontoVirgula != NULL)
+        {
+            char vencedor[50];
+            strcpy(vencedor, ultimoPontoVirgula + 1);
+
+            // Ignora empates na contagem de vitórias do ranking
+            if (strcmp(vencedor, "Empate") != 0 && strlen(vencedor) > 0)
+            {
+                int encontrado = 0;
+
+                // Verifica se o jogador já está no nosso vetor de ranking
+                for (int i = 0; i < totalJogadores; i++)
+                {
+                    if (strcmp(ranking[i].nome, vencedor) == 0)
+                    {
+                        ranking[i].vitorias++;
+                        encontrado = 1;
+                        break;
+                    }
+                }
+
+                // Se for um novo jogador, adiciona no vetor
+                if (!encontrado && totalJogadores < 100)
+                {
+                    strcpy(ranking[totalJogadores].nome, vencedor);
+                    ranking[totalJogadores].vitorias = 1;
+                    totalJogadores++;
+                }
+            }
+        }
+    }
+
+    fclose(arquivo);
+
+    if (totalJogadores == 0)
+    {
+        printf("\nNenhuma vitoria registrada no arquivo 'partidas_velha.txt' ate o momento.\n");
+        pause();
+        return;
+    }
+
+    // Ordenação do Ranking em ordem decrescente (Bubble Sort simples)
+    for (int i = 0; i < totalJogadores - 1; i++)
+    {
+        for (int j = 0; j < totalJogadores - i - 1; j++)
+        {
+            if (ranking[j].vitorias < ranking[j + 1].vitorias)
+            {
+                JogadorRanking temp = ranking[j];
+                ranking[j] = ranking[j + 1];
+                ranking[j + 1] = temp;
+            }
+        }
+    }
+
+    // Exibição formatada do Ranking
+    printf("\n=========================================\n");
+    printf("     RANKING DE JOGADORES (VITORIAS)     \n");
+    printf("=========================================\n");
+    for (int i = 0; i < totalJogadores; i++)
+    {
+        printf("%dº Lugar | %-20s : %d vitoria(s)\n", i + 1, ranking[i].nome, ranking[i].vitorias);
+    }
+    printf("=========================================\n");
+}
