@@ -1,6 +1,6 @@
 //================================================================================
 //PROJETO DA DISCIPLINA: JOGO DA VELHA EM C
-//ALUNO(S): Arthur Faturini Rangel de Paula Araujo / Márcia Kamilla ...
+//ALUNO(S): Arthur Faturini Rangel de Paula Araujo / Márcia Kamila de Nazaré Feitosa Ramos
 //================================================================================
 
 //================================================================================

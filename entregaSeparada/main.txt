@@ -1,3 +1,8 @@
+//================================================================================
+//PROJETO DA DISCIPLINA: JOGO DA VELHA EM C
+//ALUNO(S): Arthur Faturini Rangel de Paula Araujo / Márcia Kamila de Nazaré Feitosa Ramos
+//================================================================================
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
