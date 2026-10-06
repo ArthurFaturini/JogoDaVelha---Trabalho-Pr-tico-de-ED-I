@@ -112,11 +112,75 @@ void jogadaUsuario(char tabuleiro[3][3], char marcador, Nodo **listaJogadas)
     }
 }
 
+// Função recursiva do algoritmo Minimax
+int minimax(char tabuleiro[3][3], int profundidade, int eMaximizador, char marcadorComp, char marcadorUser, int limiteProfundidade)
+{
+    // Se atingiu o limite do nível, ele interrompe a visão do futuro e assume neutralidade (0)
+    if (profundidade >= limiteProfundidade)
+        return 0;
+
+    // Verifica se alguém venceu ou se empatou na simulação atual
+    if (verificarVencedor(tabuleiro, marcadorComp))
+        return 10 - profundidade; // Prefere vencer em menos jogadas
+    if (verificarVencedor(tabuleiro, marcadorUser))
+        return profundidade - 10; // Prefere adiar a derrota
+    if (verificarEmpate(tabuleiro))
+        return 0;
+
+    if (eMaximizador)
+    {
+        int melhorPontuacao = -1000;
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                if (tabuleiro[i][j] == ' ')
+                {
+                    tabuleiro[i][j] = marcadorComp;
+                    int pontuacao = minimax(tabuleiro, profundidade + 1, 0, marcadorComp, marcadorUser, limiteProfundidade);
+                    tabuleiro[i][j] = ' '; // Desfaz a jogada simulada
+                    if (pontuacao > melhorPontuacao)
+                        melhorPontuacao = pontuacao;
+                }
+            }
+        }
+        return melhorPontuacao;
+    }
+    else
+    {
+        int melhorPontuacao = 1000;
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                if (tabuleiro[i][j] == ' ')
+                {
+                    tabuleiro[i][j] = marcadorUser;
+                    int pontuacao = minimax(tabuleiro, profundidade + 1, 1, marcadorComp, marcadorUser, limiteProfundidade);
+                    tabuleiro[i][j] = ' '; // Desfaz a jogada simulada
+                    if (pontuacao < melhorPontuacao)
+                        melhorPontuacao = pontuacao;
+                }
+            }
+        }
+        return melhorPontuacao;
+    }
+}
+
+// Função principal de jogada do Computador usando Minimax
 void jogadaComputador(char tabuleiro[3][3], char marcador, Nodo **listaJogadas)
 {
-    int i, j;
+    // 9 = Imbatível (Minimax completo, enxerga até o fim do jogo)
+    // 1 ou 2 = Burro (Enxerga apenas 1 ou 2 jogadas à frente, fácil de vencer)
+    int nivelDificuldade = 9;
+
+    char marcadorUsuario = (marcador == 'X') ? 'O' : 'X';
+    int melhorValor = -1000;
+    int melhorLinha = -1;
+    int melhorColuna = -1;
+
     printf("\nComputador (%c) jogando", marcador);
-    for (i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++)
     {
         sleep(1);
         printf(".");
@@ -124,17 +188,32 @@ void jogadaComputador(char tabuleiro[3][3], char marcador, Nodo **listaJogadas)
     sleep(1);
     printf("\n");
 
-    for (i = 0; i < 3; i++)
+    // Avalia todas as casas vazias e escolhe a jogada com maior pontuação no Minimax
+    for (int i = 0; i < 3; i++)
     {
-        for (j = 0; j < 3; j++)
+        for (int j = 0; j < 3; j++)
         {
             if (tabuleiro[i][j] == ' ')
             {
                 tabuleiro[i][j] = marcador;
-                inserirJogada(listaJogadas, i, j);
-                return;
+                int valorJogada = minimax(tabuleiro, 0, 0, marcador, marcadorUsuario, nivelDificuldade);
+                tabuleiro[i][j] = ' '; // Desfaz a jogada de teste
+
+                if (valorJogada > melhorValor)
+                {
+                    melhorLinha = i;
+                    melhorColuna = j;
+                    melhorValor = valorJogada;
+                }
             }
         }
+    }
+
+    // Executa a melhor jogada encontrada e grava na lista encadeada
+    if (melhorLinha != -1 && melhorColuna != -1)
+    {
+        tabuleiro[melhorLinha][melhorColuna] = marcador;
+        inserirJogada(listaJogadas, melhorLinha, melhorColuna);
     }
 }
 

@@ -15,6 +15,7 @@ int decidirQuemComeca();
 // Jogadas atualizadas para receberem o ponteiro da lista onde devem salvar o movimento
 void jogadaUsuario(char tabuleiro[3][3], char marcador, Nodo **listaJogadas);
 void jogadaComputador(char tabuleiro[3][3], char marcador, Nodo **listaJogadas);
+int minimax(char tabuleiro[3][3], int profundidade, int eMaximizador, char marcadorComp, char marcadorUser, int limiteProfundidade);
 
 // Checagens de término da partida
 int verificarVencedor(char tabuleiro[3][3], char marcador);
