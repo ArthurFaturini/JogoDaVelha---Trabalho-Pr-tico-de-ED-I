@@ -553,7 +553,7 @@ void jogadaComputador(char tabuleiro[3][3], char marcador, Nodo **listaJogadas)
                 int valorJogada = minimax(tabuleiro, 0, 0, marcador, marcadorUsuario, nivelDificuldade);
                 tabuleiro[i][j] = ' '; // Desfaz a jogada de teste
 
-                if (valorJogada > melhorValor)
+                if (valorJogada >= melhorValor)
                 {
                     melhorLinha = i;
                     melhorColuna = j;

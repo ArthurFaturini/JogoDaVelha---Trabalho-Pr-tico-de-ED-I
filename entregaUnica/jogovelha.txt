@@ -4,6 +4,13 @@
 //================================================================================
 
 //================================================================================
+//REFERENCIA DO ALGORITMO MINIMAX
+//https://medium.com/@mhhassaan.1/mini-max-algorithm-in-artificial-intelligence-e0a0da694b3b
+//https://www.geeksforgeeks.org/dsa/minimax-algorithm-in-game-theory-set-1-introduction/
+//https://www.neverstopbuilding.com/blog/minimax
+//================================================================================
+
+//================================================================================
 //ARQUIVO: lista.h
 //================================================================================
 // lista.h
