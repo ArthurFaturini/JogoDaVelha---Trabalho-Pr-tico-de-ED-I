@@ -1,0 +1,270 @@
+#ifndef LISTA_TXT
+#define LISTA_TXT
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+// Nó para armazenar uma jogada específica
+typedef struct Nodo
+{
+    char jogada[25];
+    struct Nodo *prox;
+} Nodo;
+
+// Estrutura que guarda todo o contexto de uma partida
+typedef struct Partida
+{
+    int id;
+    char nomeUsuario[50];
+    char nomeComputador[50];
+    Nodo *jogadasUsuario;
+    Nodo *jogadasComputador;
+    char resultado[50];
+    struct Partida *prox;
+} Partida;
+
+// Estrutura auxiliar interna para o Ranking
+typedef struct
+{
+    char nome[50];
+    int vitorias;
+} JogadorRanking;
+
+// Função que pausa a tela
+void pause()
+{
+    printf("\nPressione ENTER para continuar...");
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF)
+        ;
+    getchar();
+}
+
+Partida *criarPartida(int id, const char *usuario, const char *computador)
+{
+    Partida *novaPartida = (Partida *)malloc(sizeof(Partida));
+    if (novaPartida == NULL)
+    {
+        printf("Erro de alocacao de memoria para a partida!\n");
+        exit(1);
+    }
+    novaPartida->id = id;
+    strcpy(novaPartida->nomeUsuario, usuario);
+    strcpy(novaPartida->nomeComputador, computador);
+    novaPartida->jogadasUsuario = NULL;
+    novaPartida->jogadasComputador = NULL;
+    strcpy(novaPartida->resultado, "Em andamento");
+    novaPartida->prox = NULL;
+
+    return novaPartida;
+}
+
+void inserirJogada(Nodo **inicio, int linha, int coluna)
+{
+    Nodo *novoNodo = (Nodo *)malloc(sizeof(Nodo));
+    if (novoNodo == NULL)
+    {
+        printf("Erro de alocacao de memoria para a jogada!\n");
+        exit(1);
+    }
+    snprintf(novoNodo->jogada, sizeof(novoNodo->jogada), "%d-%d", linha + 1, coluna + 1);
+    novoNodo->prox = NULL;
+
+    if (*inicio == NULL)
+    {
+        *inicio = novoNodo;
+    }
+    else
+    {
+        Nodo *atual = *inicio;
+        while (atual->prox != NULL)
+        {
+            atual = atual->prox;
+        }
+        atual->prox = novoNodo;
+    }
+}
+
+void imprimirJogadas(Nodo *inicio)
+{
+    Nodo *atual = inicio;
+    if (atual == NULL)
+    {
+        printf("Nenhuma jogada.");
+    }
+    while (atual != NULL)
+    {
+        printf("[%s] ", atual->jogada);
+        atual = atual->prox;
+    }
+    printf("\n");
+}
+
+void liberarJogadas(Nodo *inicio)
+{
+    Nodo *atual = inicio;
+    Nodo *proximo;
+    while (atual != NULL)
+    {
+        proximo = atual->prox;
+        free(atual);
+        atual = proximo;
+    }
+}
+
+void salvarPartidas(Partida **historico)
+{
+    if (historico == NULL || *historico == NULL)
+    {
+        printf("\nNenhuma partida na memoria para salvar.\n");
+        return;
+    }
+
+    FILE *arquivo = fopen("partidas_velha.txt", "a");
+    if (arquivo == NULL)
+    {
+        printf("Erro ao abrir o arquivo para salvar as partidas.\n");
+        pause();
+        return;
+    }
+
+    printf("\n=== SALVANDO PARTIDAS ===\n");
+    Partida *p = *historico;
+    Partida *proximaPartida = NULL;
+
+    while (p != NULL)
+    {
+        printf("Salvando partida %d no arquivo", p->id);
+        for (int i = 0; i < 3; i++)
+        {
+            printf(".");
+        }
+        printf("\n");
+
+        fprintf(arquivo, "%d;%s;", p->id, p->nomeUsuario);
+
+        Nodo *jUser = p->jogadasUsuario;
+        while (jUser != NULL)
+        {
+            fprintf(arquivo, "%s;", jUser->jogada);
+            jUser = jUser->prox;
+        }
+
+        fprintf(arquivo, "%s;", p->nomeComputador);
+
+        Nodo *jComp = p->jogadasComputador;
+        while (jComp != NULL)
+        {
+            fprintf(arquivo, "%s;", jComp->jogada);
+            jComp = jComp->prox;
+        }
+
+        fprintf(arquivo, "%s\n", p->resultado);
+
+        proximaPartida = p->prox;
+        liberarJogadas(p->jogadasUsuario);
+        liberarJogadas(p->jogadasComputador);
+        free(p);
+        p = proximaPartida;
+    }
+
+    fclose(arquivo);
+    *historico = NULL;
+    printf("\nPartidas salvas com sucesso!\n");
+}
+
+void exibirRanking()
+{
+    FILE *arquivo = fopen("partidas_velha.txt", "r");
+    if (arquivo == NULL)
+    {
+        printf("\nNenhum registro encontrado em 'partidas_velha.txt'. Jogue e salve partidas primeiro!\n");
+        pause();
+        return;
+    }
+
+    JogadorRanking ranking[100];
+    int totalJogadores = 0;
+    char linha[1024];
+
+    while (fgets(linha, sizeof(linha), arquivo) != NULL)
+    {
+        // Remove quebras de linha e espaços no final para não duplicar nomes
+        int len = strlen(linha);
+        while (len > 0 && (linha[len - 1] == '\n' || linha[len - 1] == '\r' || linha[len - 1] == ' '))
+        {
+            linha[--len] = '\0';
+        }
+
+        if (len == 0) continue;
+
+        char *ultimoPontoVirgula = strrchr(linha, ';');
+        if (ultimoPontoVirgula != NULL)
+        {
+            char vencedor[50];
+            strcpy(vencedor, ultimoPontoVirgula + 1);
+
+            int lenVencedor = strlen(vencedor);
+            while (lenVencedor > 0 && vencedor[lenVencedor - 1] == ' ')
+            {
+                vencedor[--lenVencedor] = '\0';
+            }
+
+            if (strcmp(vencedor, "Empate") != 0 && strlen(vencedor) > 0)
+            {
+                int encontrado = 0;
+                for (int i = 0; i < totalJogadores; i++)
+                {
+                    if (strcmp(ranking[i].nome, vencedor) == 0)
+                    {
+                        ranking[i].vitorias++;
+                        encontrado = 1;
+                        break;
+                    }
+                }
+
+                if (!encontrado && totalJogadores < 100)
+                {
+                    strcpy(ranking[totalJogadores].nome, vencedor);
+                    ranking[totalJogadores].vitorias = 1;
+                    totalJogadores++;
+                }
+            }
+        }
+    }
+
+    fclose(arquivo);
+
+    if (totalJogadores == 0)
+    {
+        printf("\nNenhuma vitoria registrada no arquivo 'partidas_velha.txt' ate o momento.\n");
+        pause();
+        return;
+    }
+
+    for (int i = 0; i < totalJogadores - 1; i++)
+    {
+        for (int j = 0; j < totalJogadores - i - 1; j++)
+        {
+            if (ranking[j].vitorias < ranking[j + 1].vitorias)
+            {
+                JogadorRanking temp = ranking[j];
+                ranking[j] = ranking[j + 1];
+                ranking[j + 1] = temp;
+            }
+        }
+    }
+
+    printf("\n=========================================\n");
+    printf("     RANKING DE JOGADORES (VITORIAS)     \n");
+    printf("=========================================\n");
+    for (int i = 0; i < totalJogadores; i++)
+    {
+        printf("%dº Lugar | %-20s : %d vitoria(s)\n", i + 1, ranking[i].nome, ranking[i].vitorias);
+    }
+    printf("=========================================\n");
+}
+
+#endif
